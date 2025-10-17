@@ -1,0 +1,120 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Simple CAPTCHA Solver</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #f9f9f9;
+  }
+  h1 {
+    text-align: center;
+  }
+  #image-container {
+    text-align: center;
+    margin: 20px 0;
+  }
+  img {
+    max-width: 100%;
+    border: 1px solid #ccc;
+    padding: 10px;
+  }
+  #controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  input[type="text"] {
+    padding: 8px;
+    font-size: 1rem;
+  }
+  button {
+    padding: 8px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  #status {
+    margin-top: 20px;
+    font-weight: bold;
+    color: green;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>CAPTCHA Solver Demo</h1>
+
+<div id="image-container">
+  <img id="captcha-image" src="" alt="CAPTCHA Image" />
+</div>
+
+<div id="controls">
+  <label for="solution-input">Enter CAPTCHA Solution:</label>
+  <input type="text" id="solution-input" placeholder="Type solution here"/>
+  <button id="submit-btn">Submit Solution</button>
+  <button id="load-image-btn">Load New Image</button>
+</div>
+
+<div id="status"></div>
+
+<script>
+  // Sample default image URL
+  const defaultImageUrl = "https://via.placeholder.com/300x100.png?text=Sample+Captcha";
+
+  // Get DOM elements
+  const image = document.getElementById("captcha-image");
+  const solutionInput = document.getElementById("solution-input");
+  const submitBtn = document.getElementById("submit-btn");
+  const loadImageBtn = document.getElementById("load-image-btn");
+  const statusDiv = document.getElementById("status");
+
+  // Function to get URL parameter
+  function getQueryParam(param) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(param);
+  }
+
+  // Load image from URL parameter or default
+  function loadImage() {
+    const urlParam = getQueryParam("url");
+    let imageUrl = urlParam ? decodeURIComponent(urlParam) : defaultImageUrl;
+    image.src = imageUrl;
+
+    // Clear previous status and input
+    statusDiv.innerText = "";
+    solutionInput.value = "";
+  }
+
+  // Store solutions locally (for demo purposes)
+  function saveSolution(imageSrc, solution) {
+    let solutions = JSON.parse(localStorage.getItem("captchaSolutions")) || [];
+    solutions.push({ image: imageSrc, solution: solution, timestamp: new Date().toISOString() });
+    localStorage.setItem("captchaSolutions", JSON.stringify(solutions));
+  }
+
+  // Handle submit
+  submitBtn.addEventListener("click", () => {
+    const solution = solutionInput.value.trim();
+    if (!solution) {
+      alert("Please enter a solution before submitting.");
+      return;
+    }
+    // Save solution
+    saveSolution(image.src, solution);
+    statusDiv.innerText = `Solution "${solution}" saved!`;
+  });
+
+  // Handle load new image
+  loadImageBtn.addEventListener("click", loadImage);
+
+  // Initialize on page load
+  window.onload = loadImage;
+</script>
+
+</body>
+</html>
